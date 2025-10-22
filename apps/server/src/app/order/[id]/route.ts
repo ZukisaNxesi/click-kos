@@ -84,3 +84,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  //delete the order
+  const supabase = await createClient();
+  const { id } = await params;
+  const { error } = await supabase.from("order").delete().eq("order_id", id);
+  if (error) throw error;
+
+  return NextResponse.json({message: "Order removed successfully"},{status: 200});
+}

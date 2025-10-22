@@ -40,6 +40,7 @@ export const processCheckout = async ({
   }
 
   try {
+
     const itemCounts = cartItems.reduce<Record<string, number>>((acc, item) => {
       const key = item.id;
       acc[key] = (acc[key] ?? 0) + 1;
@@ -83,6 +84,7 @@ export const processCheckout = async ({
       description: "Redirecting you to payment page."
     })
 
+
     const paymentResponse = await fetch(`${serverUrl}/payments`, {
       method: 'POST',
       headers: {
@@ -107,12 +109,13 @@ export const processCheckout = async ({
       throw new Error('No redirect URL received from payment service');
     }
 
-    toast("Order processed successfully.",{
-      description: `Redirecting you to payment page(${redirectUrl}).`
+    toast("Redirecting you to payment page...",{
+      description: `Please wait as we take you to stripe to complete you order.`
     })
 
-    onSuccess?.();
+    //onSuccess?.();
     window.location.href = redirectUrl;
+  
 
     return true;
   } catch (error) {

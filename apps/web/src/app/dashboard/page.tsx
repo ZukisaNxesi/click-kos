@@ -111,12 +111,14 @@ interface MenuItemFormProps {
   initialData?: MenuItem;
   onSubmit: (data: Partial<MenuItem> & { imageUrl?: string }) => void;
   isSubmitting: boolean;
+  availableCategories: string[];
 }
 
 const MenuItemForm: React.FC<MenuItemFormProps> = ({
   initialData,
   onSubmit,
   isSubmitting,
+  availableCategories,
 }) => {
   const [formData, setFormData] = useState<
     Partial<MenuItem> & { imageUrl?: string; imageFile?: File }
@@ -225,21 +227,23 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
         ></textarea>
       </div>
       <div>
-        <label
-          htmlFor="category"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Category
         </label>
-        <input
-          id="category"
-          name="category"
-          type="text"
-          required
-          value={formData.category || ""}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2 dark:bg-gray-700 dark:border-gray-600 focus:ring-[#483AA0] focus:border-[#483AA0]"
-        />
+        <select
+          value={formData.category}
+          onChange={(e) =>
+            setFormData({ ...formData, category: e.target.value })
+          }
+          className="w-full mt-1 p-2 border rounded-md dark:bg-gray-800 dark:text-white"
+        >
+          <option value="">Select a category</option>
+          <option value="Traditional">Traditional</option>
+          <option value="Grill">Grill</option>
+          <option value="Sandwhich">Sandwhich</option>
+          <option value="Beverages">Beverages</option>
+          <option value="Beverages">Other</option>
+        </select>
       </div>
       <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
         <label
@@ -357,6 +361,7 @@ interface UpdateMenuItemModalProps {
   onClose: () => void;
   onUpdate: (data: Partial<MenuItem> & { imageUrl?: string }) => void;
   isSubmitting: boolean;
+  availableCategories?: string[];
 }
 
 const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
@@ -364,6 +369,15 @@ const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
   onClose,
   onUpdate,
   isSubmitting,
+  availableCategories = [
+    "Panini",
+    "Decadent",
+    "Sandwich",
+    "Beverages",
+    "Burgers",
+    "Wraps",
+    "Add-on",
+  ],
 }) => {
   const handleSubmit = (data: Partial<MenuItem> & { imageUrl?: string }) => {
     onUpdate(data);
@@ -375,6 +389,7 @@ const UpdateMenuItemModal: React.FC<UpdateMenuItemModalProps> = ({
         initialData={item}
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
+        availableCategories={availableCategories}
       />
     </Modal>
   );
@@ -385,12 +400,22 @@ interface AddMenuItemModalProps {
   onClose: () => void;
   onAdd: (data: Partial<MenuItem> & { imageUrl?: string }) => void;
   isSubmitting: boolean;
+  availableCategories?: string[];
 }
 
 const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
   onClose,
   onAdd,
   isSubmitting,
+  availableCategories = [
+    "Panini",
+    "Decadent",
+    "Sandwich",
+    "Beverages",
+    "Burgers",
+    "Wraps",
+    "Add-on",
+  ],
 }) => {
   const handleSubmit = (data: Partial<MenuItem> & { imageUrl?: string }) => {
     onAdd(data);
@@ -398,7 +423,11 @@ const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
 
   return (
     <Modal title="Add New Menu Item" onClose={onClose}>
-      <MenuItemForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+      <MenuItemForm
+        onSubmit={handleSubmit}
+        isSubmitting={isSubmitting}
+        availableCategories={[]}
+      />
     </Modal>
   );
 };
@@ -407,9 +436,18 @@ const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
 interface MenuItemCardProps {
   item: MenuItem;
   onUpdateClick: (item: MenuItem) => void;
+  handleDelete: (itemId: string) => void;
+  isSubmitting: boolean;
+  deletingItemId: string | null;
 }
 
-const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onUpdateClick }) => {
+const MenuItemCard: React.FC<MenuItemCardProps> = ({
+  item,
+  onUpdateClick,
+  handleDelete,
+  isSubmitting,
+  deletingItemId,
+}) => {
   return (
     <div className="flex bg-gray-50 dark:bg-gray-700 rounded-lg shadow-md overflow-hidden transition-shadow hover:shadow-lg">
       {/* Invisible Item ID for staff */}
@@ -459,6 +497,18 @@ const MenuItemCard: React.FC<MenuItemCardProps> = ({ item, onUpdateClick }) => {
           >
             Update
           </button>
+
+          <button
+            onClick={() => handleDelete(item.item_id)}
+            disabled={isSubmitting && deletingItemId === item.item_id}
+            className={`px-3 py-1 text-sm rounded-full text-white ${
+              deletingItemId === item.item_id
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-red-500 hover:bg-red-600"
+            }`}
+          >
+            {deletingItemId === item.item_id ? "Deleting..." : "Delete"}
+          </button>
         </div>
       </div>
     </div>
@@ -475,6 +525,8 @@ const MenuManagement: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const availableCategories = ["Traditional", "Grill", "Sandwich", "Beverages"];
+  const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
   // Mock API Call (Replace with actual fetch logic)
 
@@ -522,69 +574,31 @@ const MenuManagement: React.FC = () => {
     setSelectedItem(item);
   };
 
-  // API Submission Handlers
-  const handleApiAction = async (
-    url: string,
-    method: "POST" | "PUT",
-    data: Partial<MenuItem> & { imageUrl?: string }
-  ) => {
-    setIsSubmitting(true);
-    setError(null);
-    setSuccessMessage(null);
+  const handleDelete = async (itemId: string) => {
+    if (!confirm("Are you sure you want to delete this item?")) return;
+
     try {
-      // MOCK API logic
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate network delay
+      setDeletingItemId(itemId);
+      setIsSubmitting(true);
 
-      const isNew = method === "POST";
-      const newItemId = isNew
-        ? `MI-${Math.floor(Math.random() * 1000) + 100}`
-        : data.item_id;
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/menu/${itemId}`,
+        { method: "DELETE" }
+      );
 
-      const newOrUpdatedItem: MenuItem = {
-        item_id: newItemId!,
-        name: data.name || "",
-        price: data.price || 0,
-        description: data.description || "",
-        available: data.available ?? true,
-        category: data.category || "",
-        item_image: data.imageUrl ? [{ url: data.imageUrl }] : undefined,
-      };
-
-      if (isNew) {
-        setMenuItems((prev) => [newOrUpdatedItem, ...prev]);
-        setSuccessMessage("Menu item added successfully!");
-      } else {
-        setMenuItems((prev) =>
-          prev.map((item) =>
-            item.item_id === newItemId ? newOrUpdatedItem : item
-          )
-        );
-        setSuccessMessage("Menu item updated successfully!");
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to delete item");
       }
-      // END MOCK
 
-      // Actual fetch would look like this:
-      /*
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error?.name || errData.error?.message || "API error occurred.");
-      }
-      setSuccessMessage(`Menu item ${isNew ? 'added' : 'updated'} successfully!`);
-      fetchMenuItems(); // Refresh data from server
-      */
-
-      setSelectedItem(null);
-      setIsAddModalOpen(false);
-    } catch (err: any) {
-      setError(err.message || "Failed to complete action.");
+      setSuccessMessage("Menu item deleted successfully!");
+      fetchMenuItems();
+    } catch (error: any) {
+      console.error("Error deleting item:", error);
+      setError(error.message || "Failed to delete item");
     } finally {
       setIsSubmitting(false);
-      setTimeout(() => setSuccessMessage(null), 3000); // Clear success after 3s
+      setDeletingItemId(null);
     }
   };
 
@@ -617,7 +631,7 @@ const MenuManagement: React.FC = () => {
         price: data.price,
         description: data.description,
         available: data.available,
-        category: data.category,
+        category: data.category?.toLowerCase(),
         imageUrl,
       };
 
@@ -654,7 +668,7 @@ const MenuManagement: React.FC = () => {
         price: data.price,
         description: data.description,
         available: data.available,
-        category: data.category,
+        category: data.category?.toLowerCase(),
       };
 
       const response = await fetch(
@@ -761,6 +775,9 @@ const MenuManagement: React.FC = () => {
               key={item.item_id}
               item={item}
               onUpdateClick={handleUpdateClick}
+              handleDelete={handleDelete}
+              isSubmitting={isSubmitting}
+              deletingItemId={deletingItemId}
             />
           ))}
         </div>
@@ -773,6 +790,7 @@ const MenuManagement: React.FC = () => {
           onClose={() => setSelectedItem(null)}
           onUpdate={handleUpdateSubmit}
           isSubmitting={isSubmitting}
+          availableCategories={availableCategories}
         />
       )}
       {isAddModalOpen && (
@@ -780,6 +798,7 @@ const MenuManagement: React.FC = () => {
           onClose={() => setIsAddModalOpen(false)}
           onAdd={handleAddSubmit}
           isSubmitting={isSubmitting}
+          availableCategories={availableCategories}
         />
       )}
     </div>

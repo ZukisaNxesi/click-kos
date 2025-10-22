@@ -2,7 +2,11 @@
 
 import React, { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import type { cartItem } from '@/context/CartContext';
+import { getAccessToken, getUserData } from '@/lib/auth';
+import { useCart } from '@/context/CartContext';
 import { toast } from "sonner";
+
 
 function PaymentSuccessContent() {
   const searchParams = useSearchParams();
@@ -41,6 +45,36 @@ function PaymentSuccessContent() {
 
           // Stop polling when terminal status reached
           if (status === "success" || status === "failed") {
+            const { cartItems } = useCart();
+
+            if (paymentStatus === "success") {
+              try {
+                const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/order`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${getAccessToken()}`,
+                  },
+                  body: JSON.stringify({
+                    items: cartItems.map(item => ({
+                      product_id: item.id,
+                      quantity: 1,
+                      price: item.price,
+                    })),
+                  }),
+                });
+
+                if (!response.ok) {
+                  const errorText = await response.text();
+                  toast('Order creation failed: ' + errorText);
+                  throw new Error(`Failed to create order (${response.status})`);
+                }
+              } catch (error) {
+                console.error("Error creating order:", error);
+              }
+            }
+
+
             if (interval) clearInterval(interval);
             interval = null;
             setIsPolling(false);

@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "click-kos",
-  description: "click-kos",
+  title: "Click & Kos",
+  description: "Discover best klipoog food.",
 };
 
 export default function RootLayout({

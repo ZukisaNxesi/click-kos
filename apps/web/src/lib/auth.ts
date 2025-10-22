@@ -1,4 +1,6 @@
 "use client"
+
+import {compressToEncodedURIComponent, decompressFromEncodedURIComponent} from "lz-string";
 // Authentication utility functions
 
 export interface UserData {
@@ -13,7 +15,8 @@ export const TOKEN_STORAGE_KEY = 'access_token';
 
 export const getAuthStatus = (): boolean => {
   if (typeof window === 'undefined') return false;
-  return localStorage.getItem(AUTH_STORAGE_KEY) === 'true';
+  //decode the auth status
+  return decompressFromEncodedURIComponent(localStorage.getItem(AUTH_STORAGE_KEY)!) === 'true';
 };
 
 export const getUserData = (): UserData | null => {
@@ -21,7 +24,11 @@ export const getUserData = (): UserData | null => {
   
   try {
     const userData = localStorage.getItem(USER_STORAGE_KEY);
-    return userData ? JSON.parse(userData) : null;
+    if(userData){
+      //decode the user data
+      return JSON.parse(decompressFromEncodedURIComponent(userData));
+    }
+    return null;
   } catch (error) {
     console.error('Error parsing user data:', error);
     return null;
@@ -37,8 +44,10 @@ export const setAuthStatus = (isAuthenticated: boolean, userData?: UserData): vo
   if (typeof window === 'undefined') return;
   
   if (isAuthenticated && userData) {
-    localStorage.setItem(AUTH_STORAGE_KEY, 'true');
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(userData));
+    localStorage.setItem(AUTH_STORAGE_KEY, compressToEncodedURIComponent('true'));
+    //At least encode the user data
+    let encodedData = compressToEncodedURIComponent(JSON.stringify(userData));
+    localStorage.setItem(USER_STORAGE_KEY, encodedData);
   } else {
     localStorage.removeItem(AUTH_STORAGE_KEY);
     localStorage.removeItem(USER_STORAGE_KEY);

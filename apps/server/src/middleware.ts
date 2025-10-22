@@ -5,7 +5,7 @@ export function middleware() {
 
   res.headers.append('Access-Control-Allow-Credentials', "true")
   res.headers.append('Access-Control-Allow-Origin', "*")
-  res.headers.append('Access-Control-Allow-Methods', 'GET,POST,PUT,OPTIONS, DELETE')
+  res.headers.append('Access-Control-Allow-Methods', 'GET,POST,PUT,OPTIONS, DELETE,PATCH')
   res.headers.append(
     'Access-Control-Allow-Headers',
     'Content-Type, Authorization'

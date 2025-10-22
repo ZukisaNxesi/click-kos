@@ -25,6 +25,7 @@ import {
   Legend,
 } from "recharts";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const COLORS = ["#483AA0", "#7965C1", "#A499D9", "#C1BAF5"];
 
@@ -38,13 +39,15 @@ export default function AnalyticsPage() {
 
   const [totalRevenue, setTotalRevenue] = useState(0);
 
+  const router = useRouter();
   // 📌 Fetch Popular Items
   useEffect(() => {
     const fetchPopularItems = async () => {
       try {
         const token = localStorage.getItem("access_token");
         if (!token) {
-          console.error("No access token found. Please log in first.");
+          toast("No access token found. Please log in first.");
+          router.replace("/auth/login");
           setLoadingItems(false);
           return;
         }
@@ -72,7 +75,7 @@ export default function AnalyticsPage() {
 
         setPopularItems(formattedItems);
       } catch (err) {
-        console.error("Error fetching popular items:", err);
+        //console.error("Error fetching popular items:", err);
         setPopularItems([]);
       } finally {
         setLoadingItems(false);
@@ -89,6 +92,7 @@ export default function AnalyticsPage() {
         const token = localStorage.getItem("access_token");
         if (!token) {
           console.error("No access token found. Please log in first.");
+          router.replace("/auth/login");
           setLoadingSales(false);
           return;
         }

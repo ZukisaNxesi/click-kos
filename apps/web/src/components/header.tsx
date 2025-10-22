@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { LogIn, LogOut, Menu, User, X } from "lucide-react";
 import { ModeToggle } from "./mode-toggle";
-import NotificationDropdown from "./NotificationsDropdown"; 
+import NotificationDropdown from "./NotificationsDropdown";
 import {
   getAuthStatus,
   getUserData,
@@ -14,7 +14,9 @@ import {
   isAuthenticated,
 } from "../lib/auth";
 import { Button } from "./ui/button";
-
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 // Type definitions
 type TabId =
@@ -29,16 +31,31 @@ interface Tab {
   id: TabId;
   label: string;
   href: string;
-  isPublic: boolean;
+  target: string[];
 }
 
 const tabs: Tab[] = [
-  { id: "overview", label: "Overview", href: "/", isPublic: true },
-  { id: "menu", label: "Menu", href: "/menu", isPublic: true },
-  { id: "orders", label: "Orders", href: "/orders", isPublic: true },
-  { id: "dashboard", label: "Dashboard", href: "/dashboard", isPublic: true },
-  { id: "analytics", label: "Analytics", href: "/analytics", isPublic: false },
-  { id: "admin", label: "Admin", href: "/admin", isPublic: false },
+  {
+    id: "overview",
+    label: "Overview",
+    href: "/",
+    target: ["student", "public"],
+  },
+  { id: "menu", label: "Menu", href: "/menu", target: ["student", "public"] },
+  { id: "orders", label: "Orders", href: "/orders", target: ["student"] },
+  {
+    id: "dashboard",
+    label: "Dashboard",
+    href: "/dashboard",
+    target: ["student", "staff"],
+  },
+  {
+    id: "analytics",
+    label: "Analytics",
+    href: "/analytics",
+    target: ["admin"],
+  },
+  { id: "admin", label: "Admin", href: "/admin", target: ["admin"] },
 ];
 
 // Default user data
@@ -55,6 +72,7 @@ export default function Header() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // Check authentication status and user data on component mount and when localStorage changes
   useEffect(() => {
@@ -114,12 +132,12 @@ export default function Header() {
   const handleSignOut = () => {
     setIsLoggedIn(false);
     setShowProfileMenu(false);
-
     // Clear authentication data using the utility function
     clearAuth(localStorage);
+    toast("Successfully signed out...");
 
     // Navigate to login page
-    window.location.href = "/auth/login";
+    router.replace("/auth/login");
   };
 
   const toggleProfileMenu = () => {
@@ -162,8 +180,15 @@ export default function Header() {
           </Button>
           <Link
             href="/"
-            className="text-lg font-bold text-[#0E2148] dark:text-white"
+            className="text-lg font-bold text-[#0E2148] dark:text-white flex gap-2 items-center"
           >
+            <Image
+              src="/logo.png"
+              alt="Click & Kos Logo"
+              width={40}
+              height={40}
+              className="rounded-xl"
+            />
             Click & Kos
           </Link>
         </div>
@@ -203,8 +228,7 @@ export default function Header() {
               </div>
             )}
             {tabs.map((tab) =>
-              !tab.isPublic &&
-              (userData?.role == "admin" || userData?.role == "staff") ? (
+              tab.target.includes(userData?.role.toLowerCase() || "") ? (
                 <Link
                   key={tab.id}
                   href={tab.href}
@@ -217,7 +241,7 @@ export default function Header() {
                 >
                   {tab.label}
                 </Link>
-              ) : tab.isPublic ? (
+              ) : tab.target.includes("public") ? (
                 <Link
                   key={tab.id}
                   href={tab.href}
@@ -241,7 +265,6 @@ export default function Header() {
                 <NotificationDropdown />
               </div>
             )}
-
 
             {/* Mobile Auth Section */}
             {mobileNavOpen && (

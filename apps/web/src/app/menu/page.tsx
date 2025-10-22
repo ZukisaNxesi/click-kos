@@ -19,10 +19,13 @@ import { toast } from "sonner";
 
 const categories = [
   { id: "all", name: "All Items", icon: ChefHat },
-  { id: "traditional", name: "Traditional", icon: ChefHat },
-  { id: "grill", name: "Grill", icon: TrendingUp },
-  { id: "sandwich", name: "Sandwiches", icon: Star },
-  { id: "beverages", name: "Beverages", icon: Clock },
+  { id: "panini", name: "Pita & Panini", icon: Star },
+  { id: "decadent", name: "Decadent treats", icon: TrendingUp },
+  { id: "sandwich", name: "Sandwiches", icon: ChefHat },
+  { id: "beverages", name: "Beverages", icon: Star },
+  { id: "burgers", name: "Burgers", icon: Star },
+  { id: "wraps", name: "Wraps", icon: Star },
+  { id: "add-on", name: "Add-on", icon: Star },
 ];
 
 export default function MenuPage() {
@@ -35,6 +38,8 @@ export default function MenuPage() {
   const [cartItemsLocal, setCartItemsLocal] = useState(0);
   const [favorites, setFavorites] = useState<number[]>([]);
   const [showCartPopup, setShowCartPopup] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [showItemModal, setShowItemModal] = useState(false);
 
   // Auto-open cart popup if ?checkout=1 is present
   useEffect(() => {
@@ -90,6 +95,16 @@ export default function MenuPage() {
         ? prev.filter((id) => id !== itemId)
         : [...prev, itemId]
     );
+  };
+  const handleItemClick = (item: any) => {
+    setSelectedItem(item);
+    setShowItemModal(true);
+  };
+  const handleAddToCartFromModal = () => {
+    if (selectedItem) {
+      addToCart(toCartItem(selectedItem));
+      setShowItemModal(false);
+    }
   };
 
   const { addToCart, cartCount, cartItems, removeFromCart, clearCart } =
@@ -184,6 +199,7 @@ export default function MenuPage() {
               {featuredItems.map((item) => (
                 <div
                   key={item.item_id}
+                  onClick={() => handleItemClick(item)}
                   className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                 >
                   {/* Image */}
@@ -194,7 +210,10 @@ export default function MenuPage() {
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
                     <button
-                      onClick={() => toggleFavorite(item.item_id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(item.id);
+                      }}
                       className={`absolute top-3 right-3 p-2 rounded-full transition-colors ${
                         favorites.includes(item.item_id)
                           ? "bg-red-100 text-red-600"
@@ -224,7 +243,10 @@ export default function MenuPage() {
                     </p>
 
                     <button
-                      onClick={() => addToCart(toCartItem(item))}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCart(toCartItem(item));
+                      }}
                       className="w-full bg-gradient-to-r from-[#483AA0] to-[#7965C1] text-white py-2 px-4 rounded-lg hover:from-[#0E2148] hover:to-[#483AA0] transition-all duration-300 font-medium"
                     >
                       Add to Cart
@@ -236,6 +258,115 @@ export default function MenuPage() {
           )}
         </div>
       </div>
+
+      {/* Item Detail Modal */}
+      {showItemModal && selectedItem && (
+        <>
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-50"
+            onClick={() => setShowItemModal(false)}
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-bold text-[#0E2148] dark:text-white">
+                  {selectedItem.name}
+                </h2>
+                <button
+                  onClick={() => setShowItemModal(false)}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 max-h-[70vh] overflow-y-auto">
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Image */}
+                  <div className="md:w-1/2">
+                    <img
+                      src={selectedItem.image}
+                      alt={selectedItem.name}
+                      className="w-full h-64 md:h-80 object-cover rounded-lg"
+                    />
+                  </div>
+
+                  {/* Details */}
+                  <div className="md:w-1/2">
+                    <div className="mb-4">
+                      <h3 className="text-2xl font-bold text-[#0E2148] dark:text-white mb-2">
+                        {selectedItem.name}
+                      </h3>
+                      <p className="text-lg font-bold text-[#483AA0] mb-4">
+                        R{selectedItem.price.toFixed(2)}
+                      </p>
+                      <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        {selectedItem.description}
+                      </p>
+                    </div>
+
+                    <div className="space-y-3 mb-6">
+                      <div className="flex items-center gap-2">
+                        <Star className="w-5 h-5 text-yellow-500 fill-current" />
+                        <span className="text-gray-700 dark:text-gray-300">
+                          {selectedItem.rating} Rating
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-[#483AA0]" />
+                        <span className="text-gray-700 dark:text-gray-300">
+                          Cook Time: {selectedItem.cookTime}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <ChefHat className="w-5 h-5 text-[#483AA0]" />
+                        <span className="text-gray-700 dark:text-gray-300 capitalize">
+                          Category: {selectedItem.category}
+                        </span>
+                      </div>
+                      {selectedItem.isPopular && (
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="w-5 h-5 text-green-500" />
+                          <span className="text-green-600 dark:text-green-400 font-medium">
+                            Popular Item
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={handleAddToCartFromModal}
+                        className="flex-1 bg-gradient-to-r from-[#483AA0] to-[#7965C1] text-white py-3 px-6 rounded-lg hover:from-[#0E2148] hover:to-[#483AA0] transition-all duration-300 font-medium"
+                      >
+                        Add to Cart
+                      </button>
+                      <button
+                        onClick={() => toggleFavorite(selectedItem.id)}
+                        className={`p-3 rounded-lg transition-colors ${
+                          favorites.includes(selectedItem.id)
+                            ? "bg-red-100 text-red-600 border border-red-300"
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border border-gray-300 dark:border-gray-600 hover:bg-gray-200 dark:hover:bg-gray-600"
+                        }`}
+                      >
+                        <Heart
+                          className={`w-5 h-5 ${
+                            favorites.includes(selectedItem.id)
+                              ? "fill-current"
+                              : ""
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Cart Popup */}
       {showCartPopup && (

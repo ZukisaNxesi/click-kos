@@ -17,10 +17,22 @@ function validateMenuItem(data: any) {
   return Object.keys(errors).length > 0 ? errors : null;
 }
 
+const menuCache = new Map();
+const cacheExpiry = () => Date.now() + 60 * 1000;//1 minute
 // GET /api/menu?available=true&category=drinks&keyword=coffee
 export async function GET(request: Request) {
   const supabase = await createClient();
   const { searchParams } = new URL(request.url);
+
+  const cacheKey = request.url.toString();
+  //get the menu from cache and send it to client.
+  if(menuCache.has(cacheKey) && menuCache.get(cacheKey).expiry > Date.now()){
+    let data = menuCache.get(cacheKey).data;
+    return NextResponse.json(
+      { message: "Menu items fetched successfully from menu cache", data },
+      { status: 200 }
+    );
+  }
 
   let query = supabase
     .from("menu_item")
@@ -42,11 +54,17 @@ export async function GET(request: Request) {
 
   }
 
+  
   const { data, error } = await query;
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  //set the cache only if there is data
+  if(data.length > 0){
+    //set cache
+    menuCache.set(cacheKey, {data,expiry: cacheExpiry()});
+  }
 
   return NextResponse.json(
     { message: "Menu items fetched successfully from menu ", data },

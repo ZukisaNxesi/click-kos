@@ -1,13 +1,36 @@
-'use client';
+"use client";
 
-import React from 'react';
+import React, { useEffect } from "react";
 
 function PaymentCancelPage() {
+  const deleteOrder = async (order_id: string) => {
+    const req = await fetch(
+      `${process.env.NEXT_PUBLIC_SERVER_URL}/order/${order_id}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        cache: "no-store",
+      }
+    );
+  };
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    let order_id = url.searchParams.get("order_id");
+    if (order_id) {
+      url.searchParams.delete("order_id");
+      window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+      deleteOrder(order_id);
+    }
+  });
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
         <div className="text-yellow-500 text-6xl mb-4">⚠️</div>
-        <h1 className="text-2xl font-bold text-gray-800 mb-2">Payment Cancelled</h1>
+        <h1 className="text-2xl font-bold text-gray-800 mb-2">
+          Payment Cancelled
+        </h1>
         <p className="text-gray-600 mb-6">
           Your payment was cancelled. No charges have been made to your account.
         </p>

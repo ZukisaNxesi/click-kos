@@ -2,7 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, Lock, User, UserPlus, AlertCircle, CheckCircle } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  UserPlus,
+  AlertCircle,
+  CheckCircle,
+} from "lucide-react";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -14,7 +23,7 @@ export default function RegisterPage() {
     confirmPassword: "",
     department: "",
     year: "",
-    role: "student"
+    role: "student",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -24,7 +33,7 @@ export default function RegisterPage() {
   const [showSuccess, setShowSuccess] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (error) setError("");
     if (field === "password") checkPasswordStrength(value);
   };
@@ -51,13 +60,22 @@ export default function RegisterPage() {
   };
 
   const validateForm = () => {
-    if (!formData.firstName || !formData.lastName) return "Please enter your full name";
-    if (!formData.email || !formData.email.includes("@")) return "Please enter a valid email address";
-    if (!formData.email.endsWith("@mynwu.ac.za")) return "Please use your university email (@mynwu.ac.za)";
+    if (!formData.firstName || !formData.lastName)
+      return "Please enter your full name";
+    if (!formData.email || !formData.email.includes("@"))
+      return "Please enter a valid email address";
+    if (
+      !formData.email.endsWith("@mynwu.ac.za") ||
+      !formData.email.endsWith("@nwu.ac.za")
+    )
+      return "Please use your university email (@mynwu.ac.za)";
     if (!formData.studentId) return "Please enter your student ID";
-    if (formData.role === "student" && formData.studentId.length !== 8) return "Student ID must be exactly 8 digits";
-    if (formData.password.length < 8) return "Password must be at least 8 characters long";
-    if (formData.password !== formData.confirmPassword) return "Passwords do not match";
+    if (formData.role === "student" && formData.studentId.length !== 8)
+      return "Student ID must be exactly 8 digits";
+    if (formData.password.length < 8)
+      return "Password must be at least 8 characters long";
+    if (formData.password !== formData.confirmPassword)
+      return "Passwords do not match";
     if (!formData.department) return "Please select your department";
     if (!formData.year) return "Please select your year of study or position";
     return null;
@@ -88,13 +106,16 @@ export default function RegisterPage() {
         year_of_study: parseInt(formData.year), // Convert to number for API
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/auth/signup`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(apiData),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/signup`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apiData),
+        }
+      );
 
       const data = await response.json();
 
@@ -105,10 +126,13 @@ export default function RegisterPage() {
           window.location.href = "/auth/login";
         }, 3000);
       } else {
-        setError(data.error || "An error occurred during registration. Please try again.");
+        setError(
+          data.error ||
+            "An error occurred during registration. Please try again."
+        );
       }
     } catch (error) {
-      console.error('Registration error:', error);
+      console.error("Registration error:", error);
       setError("An error occurred during registration. Please try again.");
     } finally {
       setIsLoading(false);
@@ -123,10 +147,17 @@ export default function RegisterPage() {
     "Natural Sciences",
     "Social Sciences",
     "Medicine",
-    "Law"
+    "Law",
   ];
 
-  const years = ["1st Year", "2nd Year", "3rd Year", "4th Year", "Postgraduate", "PhD"];
+  const years = [
+    "1st Year",
+    "2nd Year",
+    "3rd Year",
+    "4th Year",
+    "Postgraduate",
+    "PhD",
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-8 px-2 sm:px-6 lg:px-12">
@@ -144,7 +175,9 @@ export default function RegisterPage() {
           {error && (
             <div className="flex items-center gap-2 p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <AlertCircle className="w-4 h-4 text-red-600 dark:text-red-400 flex-shrink-0" />
-              <span className="text-sm text-red-600 dark:text-red-400">{error}</span>
+              <span className="text-sm text-red-600 dark:text-red-400">
+                {error}
+              </span>
             </div>
           )}
 
@@ -156,7 +189,8 @@ export default function RegisterPage() {
                   Registration Successful!
                 </h3>
                 <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                  Please check your email to verify your account. You will be redirected to login in a few seconds.
+                  Please check your email to verify your account. You will be
+                  redirected to login in a few seconds.
                 </p>
               </div>
             </div>
@@ -165,7 +199,12 @@ export default function RegisterPage() {
           {/* Name Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">First Name</label>
+              <label
+                htmlFor="firstName"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                First Name
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-gray-400" />
@@ -174,7 +213,9 @@ export default function RegisterPage() {
                   id="firstName"
                   type="text"
                   value={formData.firstName}
-                  onChange={(e) => handleInputChange("firstName", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("firstName", e.target.value)
+                  }
                   className="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#483AA0] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   placeholder="Name"
                   required
@@ -182,7 +223,12 @@ export default function RegisterPage() {
               </div>
             </div>
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Last Name</label>
+              <label
+                htmlFor="lastName"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Last Name
+              </label>
               <input
                 id="lastName"
                 type="text"
@@ -198,7 +244,12 @@ export default function RegisterPage() {
           {/* Email & ID Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">University Email</label>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                University Email
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400" />
@@ -215,7 +266,10 @@ export default function RegisterPage() {
               </div>
             </div>
             <div>
-              <label htmlFor="studentId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="studentId"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {formData.role === "student" ? "Student ID" : "Staff ID"}
               </label>
               <input
@@ -229,11 +283,17 @@ export default function RegisterPage() {
                   )
                 }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#483AA0] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder={formData.role === "student" ? "20240012" : "STAFF001"}
+                placeholder={
+                  formData.role === "student" ? "20240012" : "STAFF001"
+                }
                 required
                 maxLength={8}
                 pattern={formData.role === "student" ? "\\d{8}" : undefined}
-                title={formData.role === "student" ? "Student ID must be exactly 8 digits" : undefined}
+                title={
+                  formData.role === "student"
+                    ? "Student ID must be exactly 8 digits"
+                    : undefined
+                }
               />
             </div>
           </div>
@@ -241,20 +301,34 @@ export default function RegisterPage() {
           {/* Department & Year */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="department" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Department</label>
+              <label
+                htmlFor="department"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Department
+              </label>
               <select
                 id="department"
                 value={formData.department}
-                onChange={(e) => handleInputChange("department", e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("department", e.target.value)
+                }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#483AA0] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 required
               >
                 <option value="">Select...</option>
-                {departments.map((dept) => (<option key={dept} value={dept}>{dept}</option>))}
+                {departments.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
               </select>
             </div>
             <div>
-              <label htmlFor="year" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label
+                htmlFor="year"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
                 {formData.role === "student" ? "Year of Study" : "Position"}
               </label>
               <select
@@ -265,11 +339,22 @@ export default function RegisterPage() {
                 required
               >
                 <option value="">Select...</option>
-                {formData.role === "student" ? (
-                  years.map((year) => (<option key={year} value={year}>{year}</option>))
-                ) : (
-                  ["Lecturer","Professor","Administrator","Support Staff"].map((position) => (<option key={position} value={position}>{position}</option>))
-                )}
+                {formData.role === "student"
+                  ? years.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))
+                  : [
+                      "Lecturer",
+                      "Professor",
+                      "Administrator",
+                      "Support Staff",
+                    ].map((position) => (
+                      <option key={position} value={position}>
+                        {position}
+                      </option>
+                    ))}
               </select>
             </div>
           </div>
@@ -278,7 +363,12 @@ export default function RegisterPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Password
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
@@ -287,25 +377,48 @@ export default function RegisterPage() {
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={formData.password}
-                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("password", e.target.value)
+                  }
                   className="w-full pl-8 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#483AA0] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   placeholder="Create a strong password"
                   required
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-2 flex items-center">
-                  {showPassword ? <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" /> : <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-2 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+                  )}
                 </button>
               </div>
               {formData.password && (
                 <div className="mt-1">
                   <div className="flex justify-between items-center text-sm mb-1">
-                    <span className="text-gray-600 dark:text-gray-400">Password strength:</span>
-                    <span className={`font-medium ${passwordStrength < 50 ? "text-red-600" : passwordStrength < 75 ? "text-yellow-600" : "text-green-600"}`}>
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Password strength:
+                    </span>
+                    <span
+                      className={`font-medium ${
+                        passwordStrength < 50
+                          ? "text-red-600"
+                          : passwordStrength < 75
+                          ? "text-yellow-600"
+                          : "text-green-600"
+                      }`}
+                    >
                       {getPasswordStrengthText()}
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                    <div className={`h-2 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`} style={{ width: `${passwordStrength}%` }}></div>
+                    <div
+                      className={`h-2 rounded-full transition-all duration-300 ${getPasswordStrengthColor()}`}
+                      style={{ width: `${passwordStrength}%` }}
+                    ></div>
                   </div>
                 </div>
               )}
@@ -313,7 +426,12 @@ export default function RegisterPage() {
 
             {/* Confirm Password */}
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm Password</label>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Confirm Password
+              </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400" />
@@ -322,13 +440,23 @@ export default function RegisterPage() {
                   id="confirmPassword"
                   type={showConfirmPassword ? "text" : "password"}
                   value={formData.confirmPassword}
-                  onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("confirmPassword", e.target.value)
+                  }
                   className="w-full pl-8 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-[#483AA0] focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                   placeholder="Confirm your password"
                   required
                 />
-                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute inset-y-0 right-0 pr-2 flex items-center">
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" /> : <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />}
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-2 flex items-center"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+                  )}
                 </button>
               </div>
               {formData.confirmPassword && (
@@ -336,12 +464,16 @@ export default function RegisterPage() {
                   {formData.password === formData.confirmPassword ? (
                     <>
                       <CheckCircle className="w-4 h-4 text-green-600" />
-                      <span className="text-sm text-green-600">Passwords match</span>
+                      <span className="text-sm text-green-600">
+                        Passwords match
+                      </span>
                     </>
                   ) : (
                     <>
                       <AlertCircle className="w-4 h-4 text-red-600" />
-                      <span className="text-sm text-red-600">Passwords do not match</span>
+                      <span className="text-sm text-red-600">
+                        Passwords do not match
+                      </span>
                     </>
                   )}
                 </div>
@@ -351,12 +483,30 @@ export default function RegisterPage() {
 
           {/* Terms */}
           <div className="flex items-start">
-            <input id="terms" type="checkbox" required className="h-4 w-4 text-[#483AA0] focus:ring-[#483AA0] border-gray-300 rounded mt-1" />
-            <label htmlFor="terms" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+            <input
+              id="terms"
+              type="checkbox"
+              required
+              className="h-4 w-4 text-[#483AA0] focus:ring-[#483AA0] border-gray-300 rounded mt-1"
+            />
+            <label
+              htmlFor="terms"
+              className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+            >
               I agree to the{" "}
-              <Link href="/terms" className="text-[#483AA0] dark:text-[#7965C1] hover:text-[#0E2148] dark:hover:text-[#483AA0] font-medium">Terms of Service</Link>{" "}
+              <Link
+                href="/terms"
+                className="text-[#483AA0] dark:text-[#7965C1] hover:text-[#0E2148] dark:hover:text-[#483AA0] font-medium"
+              >
+                Terms of Service
+              </Link>{" "}
               and{" "}
-              <Link href="/privacy" className="text-[#483AA0] dark:text-[#7965C1] hover:text-[#0E2148] dark:hover:text-[#483AA0] font-medium">Privacy Policy</Link>
+              <Link
+                href="/privacy"
+                className="text-[#483AA0] dark:text-[#7965C1] hover:text-[#0E2148] dark:hover:text-[#483AA0] font-medium"
+              >
+                Privacy Policy
+              </Link>
             </label>
           </div>
 
@@ -374,7 +524,10 @@ export default function RegisterPage() {
           {/* Already have an account */}
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{" "}
-            <Link href="/auth/login" className="text-[#483AA0] dark:text-[#7965C1] hover:underline">
+            <Link
+              href="/auth/login"
+              className="text-[#483AA0] dark:text-[#7965C1] hover:underline"
+            >
               Login
             </Link>
           </p>

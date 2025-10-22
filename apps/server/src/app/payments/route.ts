@@ -3,18 +3,17 @@ import { createClient } from "@/utils/supabase/server";
 import Stripe from "stripe";
 
 
-
+//new approach, add order to db, hold the order id in the payment table, then if that payment is unsuccessful, delete the order from the db
 export async function POST(req: NextRequest) {
-  
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-08-27.basil" as any,
-});
+    apiVersion: "2025-08-27.basil" as any,
+  });
+
   try {
-    const { order_id, amount, email } = await req.json();
+    const { amount, email, order_id } = await req.json(); 
     const supabase = await createClient();
 
-    // Ensure we have a valid absolute URL with scheme for Stripe redirects
-    // Prefer APP_URL, but fall back to request origin if unset/invalid
+    // Determine app URL
     const fallbackOrigin = req.nextUrl.origin; // e.g., http://localhost:3000
     const configuredWebUrl =
       process.env.WEB_APP_URL ||
@@ -26,7 +25,7 @@ export async function POST(req: NextRequest) {
       appUrl = configuredWebUrl;
     }
 
-    // Insert payment row
+    // Insert payment row first
     const { data: payment, error } = await supabase
       .from("payment")
       .insert([
@@ -66,25 +65,15 @@ export async function POST(req: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       customer_email: email,
-      line_items: line_items.length > 0 ? line_items : [
-        {
-          price_data: {
-            currency: "zar",
-            product_data: { name: `Order ${order_id}` },
-            unit_amount: Math.round(amount * 100),
-          },
-          quantity: 1,
-        },
-      ],
+      line_items,
       mode: "payment",
-      //Include payment_id in success URL for frontend lookup
       success_url: `${appUrl}/payments/success?payment_id=${payment.payment_id}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/payments/cancel`,
-      metadata: { payment_id: payment.payment_id, order_id },
+      cancel_url: `${appUrl}/payments/cancel?order_id=${order_id}`,
+      metadata: { payment_id: payment.payment_id},
     });
 
     return NextResponse.json({ payment, redirectUrl: session.url });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 400 });
+    return NextResponse.json({ error: err }, { status: 400 });
   }
 }

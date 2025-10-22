@@ -30,27 +30,26 @@ export default function ForgotPasswordPage() {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/forgot-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/auth/forgot-password`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email }),
+        }
+      );
 
       const data = await response.json();
 
       if (response.ok) {
-        // In development, show the reset link for testing
-        if (process.env.NODE_ENV === 'development') {
-          console.log('Password reset link:', data.resetLink);
-        }
         setSuccess(true);
       } else {
         setError(data.error || "An error occurred. Please try again.");
       }
     } catch (error) {
-      console.error('Forgot password error:', error);
+      console.error("Forgot password error:", error);
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
@@ -65,7 +64,9 @@ export default function ForgotPasswordPage() {
             <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-4">
               <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Check your email</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              Check your email
+            </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               We've sent password reset instructions to <strong>{email}</strong>
             </p>
@@ -93,9 +94,12 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4">
       <div className="w-full max-w-md space-y-6 bg-white dark:bg-gray-800 shadow-xl rounded-2xl p-8">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Forgot your password?</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            Forgot your password?
+          </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            No worries! Enter your email address and we'll send you reset instructions.
+            No worries! Enter your email address and we'll send you reset
+            instructions.
           </p>
         </div>
 
