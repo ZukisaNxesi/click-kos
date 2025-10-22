@@ -66,7 +66,7 @@ export async function PUT(
   let body: any = {};
   let file: File | null = null;
 
-  // 1️⃣ Handle multipart/form-data or JSON
+  // Handle multipart/form-data or JSON
   if (contentType.includes("multipart/form-data")) {
     const formData = await req.formData();
     file = formData.get("file") as File | null;
@@ -78,13 +78,13 @@ export async function PUT(
   // Separate image-related fields
   const { file: _file, imageUrl, ...updateFields } = body;
 
-  // 2️⃣ Validate menu item fields if provided
+  // Validate menu item fields if provided
   if (Object.keys(updateFields).length > 0) {
     const errors = validateMenuItem(updateFields, { partial: true });
     if (errors) return NextResponse.json({ error: errors }, { status: 400 });
   }
 
-  // 3️⃣ Update menu item fields if any
+  //  Update menu item fields if any
   let menuItemData = null;
   if (Object.keys(updateFields).length > 0) {
     const { data, error } = await supabase
@@ -97,7 +97,7 @@ export async function PUT(
     menuItemData = data;
   }
 
-  // 4️⃣ Handle image update (file upload or imageUrl)
+  // Handle image update (file upload or imageUrl)
   let imageRecord = null;
 
   if (file || imageUrl) {
@@ -150,7 +150,7 @@ export async function PUT(
     }
   }
 
-  // 5️⃣ Fetch existing menu item if it wasn't updated
+  //  Fetch existing menu item if it wasn't updated
   if (!menuItemData) {
     const { data, error } = await supabase
       .from("menu_item")
@@ -161,7 +161,7 @@ export async function PUT(
     menuItemData = data;
   }
 
-  // 6️⃣ Fetch existing image if it wasn't updated
+  // Fetch existing image if it wasn't updated
   if (!imageRecord) {
     const { data, error } = await supabase
       .from("item_image")
