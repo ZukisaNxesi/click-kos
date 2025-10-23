@@ -238,11 +238,10 @@ const MenuItemForm: React.FC<MenuItemFormProps> = ({
           className="w-full mt-1 p-2 border rounded-md dark:bg-gray-800 dark:text-white"
         >
           <option value="">Select a category</option>
-          <option value="Traditional">Traditional</option>
-          <option value="Grill">Grill</option>
-          <option value="Sandwhich">Sandwhich</option>
-          <option value="Beverages">Beverages</option>
-          <option value="Beverages">Other</option>
+          {availableCategories.map((category) => (
+            <option value={category}>{category}</option>
+          ))}
+          <option value="Other">Other</option>
         </select>
       </div>
       <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-md">
@@ -426,7 +425,7 @@ const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
       <MenuItemForm
         onSubmit={handleSubmit}
         isSubmitting={isSubmitting}
-        availableCategories={[]}
+        availableCategories={availableCategories}
       />
     </Modal>
   );
@@ -525,7 +524,15 @@ const MenuManagement: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const availableCategories = ["Traditional", "Grill", "Sandwich", "Beverages"];
+  const availableCategories = [
+    "Panini",
+    "Decadent",
+    "Sandwich",
+    "Beverages",
+    "Burgers",
+    "Wraps",
+    "Add-on",
+  ];
   const [deletingItemId, setDeletingItemId] = useState<string | null>(null);
 
   // Mock API Call (Replace with actual fetch logic)

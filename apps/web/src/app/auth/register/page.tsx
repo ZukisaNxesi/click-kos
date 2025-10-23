@@ -65,7 +65,7 @@ export default function RegisterPage() {
     if (!formData.email || !formData.email.includes("@"))
       return "Please enter a valid email address";
     if (
-      !formData.email.endsWith("@mynwu.ac.za") ||
+      !formData.email.endsWith("@mynwu.ac.za") &&
       !formData.email.endsWith("@nwu.ac.za")
     )
       return "Please use your university email (@mynwu.ac.za)";

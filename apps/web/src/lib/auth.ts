@@ -72,3 +72,17 @@ export const clearAuth = (storage?:any): void => {
 export const isAuthenticated = (): boolean => {
   return getAuthStatus() && getUserData() !== null && getAccessToken() !== null;
 };
+
+export const isTokenExpired = (): boolean => {
+  const token = getAccessToken();
+  if (!token) return true;
+
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const expiry = payload.exp * 1000; // convert to ms
+    return Date.now() > expiry;
+  } catch (err) {
+    console.error('Invalid token format:', err);
+    return true; // treat as expired
+  }
+};
